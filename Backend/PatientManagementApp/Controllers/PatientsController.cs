@@ -67,9 +67,9 @@ namespace PatientManagementApp.Controllers
 			}
 		}
 
-		// PUT: api/patients/update/{id}
-		[HttpPut("update/{id}")]
-		public async Task<IActionResult> UpdatePatient(int id, [FromBody] UpdatePatientDto updatePatientDto)
+		// PUT: api/patients/update
+		[HttpPut("update")]
+		public async Task<IActionResult> UpdatePatient([FromBody] UpdatePatientDto updatePatientDto)
 		{
 			try
 			{
