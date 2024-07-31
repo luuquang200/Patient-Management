@@ -45,7 +45,7 @@ namespace PatientManagementApp.Repositories
 			{
 				query = query.Where(p => p.FirstName.Contains(searchTerm) ||
 										 p.LastName.Contains(searchTerm) ||
-										 p.DateOfBirth.ToString().Contains(searchTerm) ||
+										 p.DateOfBirth.Date.ToString().Contains(searchTerm) ||
 										 p.ContactInfos.Any(c => c.Value.Contains(searchTerm)));
 			}
 
