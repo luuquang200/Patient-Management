@@ -8,101 +8,138 @@ using System.Threading.Tasks;
 
 namespace PatientManagementApp.Controllers
 {
-	[Route("api/patients")]
-	[ApiController]
-	public class PatientsController : ControllerBase
-	{
-		private readonly IPatientService _patientService;
+    [Route("api/patients")]
+    [ApiController]
+    public class PatientsController : ControllerBase
+    {
+        private readonly IPatientService _patientService;
 
-		public PatientsController(IPatientService patientService)
-		{
-			_patientService = patientService;
-		}
+        public PatientsController(IPatientService patientService)
+        {
+            _patientService = patientService;
+        }
 
-		// POST: api/patients/create
-		[HttpPost("create")]
-		public async Task<ActionResult<PatientDto>> CreatePatient([FromBody] CreatePatientDto createPatientDto)
-		{
-			try
-			{
-				PatientDto patientDto = await _patientService.AddPatient(createPatientDto);
-				return CreatedAtAction("GetPatient", new { id = patientDto.Id }, patientDto);
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, "Internal server error: " + ex.Message);
-			}
-		}
+        // POST: api/patients/create
+        [HttpPost("create")]
+        public async Task<ActionResult<ApiResponse<PatientDto>>> CreatePatient([FromBody] CreatePatientDto createPatientDto)
+        {
+            var response = new ApiResponse<PatientDto>();
 
-		// GET: api/patients/search
-		[HttpGet("search")]
-		public async Task<ActionResult<PaginatedList<PatientDto>>> SearchPatients([FromQuery] string? searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-		{
-			try
-			{
-				var paginatedPatients = await _patientService.SearchPatients(searchTerm, page, pageSize);
-				return Ok(paginatedPatients);
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, "Internal server error: " + ex.Message);
-			}
-		}
+            try
+            {
+                var patientDto = await _patientService.AddPatient(createPatientDto);
+                response.Data = patientDto;
+                response.Message = "Patient created successfully";
+                return CreatedAtAction("GetPatient", new { id = patientDto.Id }, response);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                response.Success = false;
+                response.Message = ex.Message;
+                return StatusCode(500, response);
+            }
+        }
 
+        // GET: api/patients/search
+        [HttpGet("search")]
+        public async Task<ActionResult<ApiResponse<PaginatedList<PatientDto>>>> SearchPatients([FromQuery] string? searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var response = new ApiResponse<PaginatedList<PatientDto>>();
 
-		// GET: api/patients/get/{id}
-		[HttpGet("get/{id}")]
-		public async Task<ActionResult<PatientDto>> GetPatient(int id)
-		{
-			try
-			{
-				var patient = await _patientService.GetPatientById(id);
-				if (patient == null)
-				{
-					return NotFound();
-				}
-				return Ok(patient);
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, "Internal server error: " + ex.Message);
-			}
-		}
+            try
+            {
+                var paginatedPatients = await _patientService.SearchPatients(searchTerm, page, pageSize);
+                response.Data = paginatedPatients;
+                response.Message = "Patients retrieved successfully";
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                response.Success = false;
+                response.Message = ex.Message;
+                return StatusCode(500, response);
+            }
+        }
 
-		// PUT: api/patients/update
-		[HttpPut("update")]
-		public async Task<IActionResult> UpdatePatient([FromBody] UpdatePatientDto updatePatientDto)
-		{
-			try
-			{
-				await _patientService.UpdatePatient(updatePatientDto);
-				return NoContent();
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, "Internal server error: " + ex.Message);
-			}
-		}
+        // GET: api/patients/get/{id}
+        [HttpGet("get/{id}")]
+        public async Task<ActionResult<ApiResponse<PatientDto>>> GetPatient(int id)
+        {
+            var response = new ApiResponse<PatientDto>();
 
-		// DELETE: api/patients/deactivate/{id}
-		[HttpDelete("deactivate/{id}")]
-		public async Task<IActionResult> DeactivatePatient(int id, [FromBody] string reason)
-		{
-			try
-			{
-				var patient = await _patientService.GetPatientById(id);
-				if (patient == null)
-				{
-					return NotFound();
-				}
+            try
+            {
+                var patient = await _patientService.GetPatientById(id);
+                if (patient == null)
+                {
+                    response.Success = false;
+                    response.Message = "Patient not found";
+                    return NotFound(response);
+                }
+                response.Data = patient;
+                response.Message = "Patient retrieved successfully";
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                response.Success = false;
+                response.Message = ex.Message;
+                return StatusCode(500, response);
+            }
+        }
 
-				await _patientService.DeactivatePatient(id, reason);
-				return NoContent();
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, "Internal server error: " + ex.Message);
-			}
-		}
-	}
+        // PUT: api/patients/update
+        [HttpPut("update")]
+        public async Task<ActionResult<ApiResponse<PatientDto>>> UpdatePatient([FromBody] UpdatePatientDto updatePatientDto)
+        {
+            var response = new ApiResponse<PatientDto>();
+
+            try
+            {
+                var patientDto = await _patientService.UpdatePatient(updatePatientDto);
+                response.Message = "Patient updated successfully";
+				response.Data = patientDto;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                response.Success = false;
+                response.Message = ex.Message;
+                return StatusCode(500, response);
+            }
+        }
+
+        // DELETE: api/patients/deactivate/{id}
+        [HttpDelete("deactivate/{id}")]
+        public async Task<ActionResult<ApiResponse<string>>> DeactivatePatient(int id, [FromBody] string reason)
+        {
+            var response = new ApiResponse<string>();
+
+            try
+            {
+                var patient = await _patientService.GetPatientById(id);
+                if (patient == null)
+                {
+                    response.Success = false;
+                    response.Message = "Patient not found";
+                    return NotFound(response);
+                }
+
+                await _patientService.DeactivatePatient(id, reason);
+                response.Message = "Patient deactivated successfully";
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                response.Success = false;
+                response.Message = ex.Message;
+                return StatusCode(500, response);
+            }
+        }
+    }
 }
