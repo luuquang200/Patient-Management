@@ -16,4 +16,8 @@ WORKDIR /app
 
 # Copy the app
 COPY --from=build-env /app/out .
+
+# Expose the port
+EXPOSE 8080
+
 ENTRYPOINT ["dotnet", "PatientManagementApp.dll"]
