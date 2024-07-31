@@ -9,7 +9,7 @@
         "CONNECTION_STRING": "Data Source=LAPTOP-4D049S1C\\SQLEXPRESS;Initial Catalog=PatientManagementDB;Integrated Security=True;Pooling=False"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7022;http://localhost:5029"
+      "applicationUrl": "https://localhost:7022;http://localhost:8080"
     },
     "IIS Express": {
       "commandName": "IISExpress",
