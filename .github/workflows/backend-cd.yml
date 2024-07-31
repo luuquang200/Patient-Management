@@ -9,7 +9,7 @@ env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
   SERVICE_NAME: patient-service
   REGION: us-central1
-  WORKING_DIRECTORY: ./backend  
+  WORKING_DIRECTORY: ./Backend/PatientManagementApp
 
 jobs:
   build-and-deploy:
