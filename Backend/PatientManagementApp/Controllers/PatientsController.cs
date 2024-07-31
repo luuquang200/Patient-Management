@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PatientManagementApp.DTOs;
+using PatientManagementApp.Helpers;
 using PatientManagementApp.Services;
 using System;
 using System.Collections.Generic;
@@ -35,18 +36,19 @@ namespace PatientManagementApp.Controllers
 
 		// GET: api/patients/search
 		[HttpGet("search")]
-		public async Task<ActionResult<IEnumerable<PatientDto>>> SearchPatients([FromQuery] string searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PaginatedList<PatientDto>>> SearchPatients([FromQuery] string searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			try
 			{
-				var patients = await _patientService.SearchPatients(searchTerm, page, pageSize);
-				return Ok(patients);
+				var paginatedPatients = await _patientService.SearchPatients(searchTerm, page, pageSize);
+				return Ok(paginatedPatients);
 			}
 			catch (Exception ex)
 			{
 				return StatusCode(500, "Internal server error: " + ex.Message);
 			}
 		}
+
 
 		// GET: api/patients/get/{id}
 		[HttpGet("get/{id}")]

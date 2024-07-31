@@ -1,4 +1,5 @@
 ﻿using PatientManagementApp.DTOs;
+using PatientManagementApp.Helpers;
 using PatientManagementApp.Models;
 using PatientManagementApp.Repositories;
 using System;
@@ -11,7 +12,7 @@ namespace PatientManagementApp.Services
 	public interface IPatientService
 	{
 		Task<IEnumerable<PatientDto>> GetPatients();
-		Task<IEnumerable<PatientDto>> SearchPatients(string searchTerm, int page, int pageSize);
+		Task<PaginatedList<PatientDto>> SearchPatients(string searchTerm, int page, int pageSize);
 		Task<PatientDto?> GetPatientById(int id);
 		Task<PatientDto> AddPatient(CreatePatientDto createPatientDto);
 		Task<PatientDto> UpdatePatient(UpdatePatientDto updatePatientDto);
@@ -33,10 +34,12 @@ namespace PatientManagementApp.Services
 			return patients.Select(p => PatientMapper.MapToPatientDto(p));
 		}
 
-		public async Task<IEnumerable<PatientDto>> SearchPatients(string searchTerm, int page, int pageSize)
+		public async Task<PaginatedList<PatientDto>> SearchPatients(string searchTerm, int page, int pageSize)
 		{
-			var patients = await _patientRepository.SearchPatients(searchTerm, page, pageSize);
-			return patients.Select(p => PatientMapper.MapToPatientDto(p));
+			var paginatedPatients = await _patientRepository.SearchPatients(searchTerm, page, pageSize);
+			var patientDtos = paginatedPatients.Items.Select(p => PatientMapper.MapToPatientDto(p)).ToList();
+
+			return new PaginatedList<PatientDto>(patientDtos, paginatedPatients.TotalCount, paginatedPatients.PageIndex, pageSize);
 		}
 
 		public async Task<PatientDto?> GetPatientById(int id)
