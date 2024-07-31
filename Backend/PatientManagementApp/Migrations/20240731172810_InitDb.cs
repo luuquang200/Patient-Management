@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PatientManagementApp.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class InitDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -37,9 +37,9 @@ namespace PatientManagementApp.Migrations
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    InactiveReason = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    InactiveReason = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     PrimaryAddressAddressId = table.Column<int>(type: "int", nullable: false),
-                    SecondaryAddressAddressId = table.Column<int>(type: "int", nullable: false)
+                    SecondaryAddressAddressId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {

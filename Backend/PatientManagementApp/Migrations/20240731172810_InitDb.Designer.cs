@@ -12,8 +12,8 @@ using PatientManagementApp.Data;
 namespace PatientManagementApp.Migrations
 {
     [DbContext(typeof(PatientContext))]
-    [Migration("20240731035940_UpdateSecondaryAddressNullable")]
-    partial class UpdateSecondaryAddressNullable
+    [Migration("20240731172810_InitDb")]
+    partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
