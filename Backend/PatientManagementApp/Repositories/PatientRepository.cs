@@ -11,7 +11,7 @@ namespace PatientManagementApp.Repositories
 	public interface IPatientRepository
 	{
 		Task<IEnumerable<Patient>> GetPatients();
-		Task<PaginatedList<Patient>>  SearchPatients(string searchTerm, int page, int pageSize); 
+		Task<PaginatedList<Patient>> SearchPatients(string? searchTerm, int page, int pageSize); 
 		Task<Patient> GetPatientById(int id);
 		Task AddPatient(Patient patient);
 		Task UpdatePatient(Patient patient);
@@ -35,7 +35,7 @@ namespace PatientManagementApp.Repositories
 										  .ToListAsync();
 		}
 
-		public async Task<PaginatedList<Patient>> SearchPatients(string searchTerm, int page, int pageSize)
+		public async Task<PaginatedList<Patient>> SearchPatients(string? searchTerm, int page, int pageSize)
 		{
 			var query = _context.Patients.Include(p => p.ContactInfos)
 										.Include(p => p.PrimaryAddress)

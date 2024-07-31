@@ -12,7 +12,7 @@ namespace PatientManagementApp.Services
 	public interface IPatientService
 	{
 		Task<IEnumerable<PatientDto>> GetPatients();
-		Task<PaginatedList<PatientDto>> SearchPatients(string searchTerm, int page, int pageSize);
+		Task<PaginatedList<PatientDto>> SearchPatients(string? searchTerm, int page, int pageSize);
 		Task<PatientDto?> GetPatientById(int id);
 		Task<PatientDto> AddPatient(CreatePatientDto createPatientDto);
 		Task<PatientDto> UpdatePatient(UpdatePatientDto updatePatientDto);
@@ -34,7 +34,7 @@ namespace PatientManagementApp.Services
 			return patients.Select(p => PatientMapper.MapToPatientDto(p));
 		}
 
-		public async Task<PaginatedList<PatientDto>> SearchPatients(string searchTerm, int page, int pageSize)
+		public async Task<PaginatedList<PatientDto>> SearchPatients(string? searchTerm, int page, int pageSize)
 		{
 			var paginatedPatients = await _patientRepository.SearchPatients(searchTerm, page, pageSize);
 			var patientDtos = paginatedPatients.Items.Select(p => PatientMapper.MapToPatientDto(p)).ToList();

@@ -36,7 +36,7 @@ namespace PatientManagementApp.Controllers
 
 		// GET: api/patients/search
 		[HttpGet("search")]
-		public async Task<ActionResult<PaginatedList<PatientDto>>> SearchPatients([FromQuery] string searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PaginatedList<PatientDto>>> SearchPatients([FromQuery] string? searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			try
 			{
