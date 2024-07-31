@@ -11,10 +11,12 @@ namespace PatientManagementApp.Services
 	public interface IPatientService
 	{
 		Task<IEnumerable<PatientDto>> GetPatients();
+		Task<IEnumerable<PatientDto>> SearchPatients(string searchTerm, int page, int pageSize);
 		Task<PatientDto?> GetPatientById(int id);
 		Task<PatientDto> AddPatient(CreatePatientDto createPatientDto);
 		Task<PatientDto> UpdatePatient(UpdatePatientDto updatePatientDto);
 		Task DeactivatePatient(int id, string reason);
+		
 	}
 	public class PatientService : IPatientService
 	{
@@ -28,6 +30,12 @@ namespace PatientManagementApp.Services
 		public async Task<IEnumerable<PatientDto>> GetPatients()
 		{
 			var patients = await _patientRepository.GetPatients();
+			return patients.Select(p => PatientMapper.MapToPatientDto(p));
+		}
+
+		public async Task<IEnumerable<PatientDto>> SearchPatients(string searchTerm, int page, int pageSize)
+		{
+			var patients = await _patientRepository.SearchPatients(searchTerm, page, pageSize);
 			return patients.Select(p => PatientMapper.MapToPatientDto(p));
 		}
 

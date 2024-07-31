@@ -10,6 +10,7 @@ namespace PatientManagementApp.Repositories
 	public interface IPatientRepository
 	{
 		Task<IEnumerable<Patient>> GetPatients();
+		Task<IEnumerable<Patient>> SearchPatients(string searchTerm, int page, int pageSize); 
 		Task<Patient> GetPatientById(int id);
 		Task AddPatient(Patient patient);
 		Task UpdatePatient(Patient patient);
@@ -32,6 +33,27 @@ namespace PatientManagementApp.Repositories
 										  .Include(p => p.SecondaryAddress)
 										  .ToListAsync();
 		}
+
+		public async Task<IEnumerable<Patient>> SearchPatients(string searchTerm, int page, int pageSize)
+		{
+			var query = _context.Patients.Include(p => p.ContactInfos)
+										 .Include(p => p.PrimaryAddress)
+										 .Include(p => p.SecondaryAddress)
+										 .AsQueryable();
+
+			if (!string.IsNullOrEmpty(searchTerm))
+			{
+				query = query.Where(p => p.FirstName.Contains(searchTerm) ||
+										 p.LastName.Contains(searchTerm) ||
+										 p.DateOfBirth.ToString().Contains(searchTerm) ||
+										 p.ContactInfos.Any(c => c.Value.Contains(searchTerm)));
+			}
+
+			return await query.Skip((page - 1) * pageSize)
+							  .Take(pageSize)
+							  .ToListAsync();
+		}
+
 
 		public async Task<Patient> GetPatientById(int id)
 		{

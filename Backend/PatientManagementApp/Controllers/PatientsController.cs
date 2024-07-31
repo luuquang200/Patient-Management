@@ -35,11 +35,11 @@ namespace PatientManagementApp.Controllers
 
 		// GET: api/patients/search
 		[HttpGet("search")]
-		public async Task<ActionResult<IEnumerable<PatientDto>>> GetPatients()
+		public async Task<ActionResult<IEnumerable<PatientDto>>> SearchPatients([FromQuery] string searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			try
 			{
-				var patients = await _patientService.GetPatients();
+				var patients = await _patientService.SearchPatients(searchTerm, page, pageSize);
 				return Ok(patients);
 			}
 			catch (Exception ex)
