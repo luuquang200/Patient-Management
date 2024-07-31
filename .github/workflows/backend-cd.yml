@@ -9,7 +9,7 @@ env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
-  WORKING_DIRECTORY: ./backend
+  WORKING_DIRECTORY: ./Backend/PatientManagementApp
 
 jobs:
   build-and-deploy:
