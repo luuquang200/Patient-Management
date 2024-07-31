@@ -1,4 +1,5 @@
 ﻿using PatientManagementApp.DTOs;
+using PatientManagementApp.Helpers;
 using PatientManagementApp.Models;
 using PatientManagementApp.Repositories;
 using System;
@@ -11,10 +12,12 @@ namespace PatientManagementApp.Services
 	public interface IPatientService
 	{
 		Task<IEnumerable<PatientDto>> GetPatients();
+		Task<PaginatedList<PatientDto>> SearchPatients(string? searchTerm, int page, int pageSize);
 		Task<PatientDto?> GetPatientById(int id);
 		Task<PatientDto> AddPatient(CreatePatientDto createPatientDto);
 		Task<PatientDto> UpdatePatient(UpdatePatientDto updatePatientDto);
 		Task DeactivatePatient(int id, string reason);
+		
 	}
 	public class PatientService : IPatientService
 	{
@@ -29,6 +32,14 @@ namespace PatientManagementApp.Services
 		{
 			var patients = await _patientRepository.GetPatients();
 			return patients.Select(p => PatientMapper.MapToPatientDto(p));
+		}
+
+		public async Task<PaginatedList<PatientDto>> SearchPatients(string? searchTerm, int page, int pageSize)
+		{
+			var paginatedPatients = await _patientRepository.SearchPatients(searchTerm, page, pageSize);
+			var patientDtos = paginatedPatients.Items.Select(p => PatientMapper.MapToPatientDto(p)).ToList();
+
+			return new PaginatedList<PatientDto>(patientDtos, paginatedPatients.TotalCount, paginatedPatients.PageIndex, pageSize);
 		}
 
 		public async Task<PatientDto?> GetPatientById(int id)
@@ -97,70 +108,5 @@ namespace PatientManagementApp.Services
 		{
 			await _patientRepository.DeactivatePatient(id, reason);
 		}
-
-		//private PatientDto MapToDto(Patient patient)
-		//{
-		//	return new PatientDto
-		//	{
-		//		Id = patient.PatientId,
-		//		FirstName = patient.FirstName,
-		//		LastName = patient.LastName,
-		//		Gender = patient.Gender,
-		//		DateOfBirth = patient.DateOfBirth,
-		//		ContactInfos = patient.ContactInfos.Select(c => new ContactInfoDto
-		//		{
-		//			Type = c.Type,
-		//			Value = c.Value
-		//		}).ToList(),
-		//		PrimaryAddress = new AddressDto
-		//		{
-		//			Street = patient.PrimaryAddress.Street,
-		//			City = patient.PrimaryAddress.City,
-		//			State = patient.PrimaryAddress.State,
-		//			ZipCode = patient.PrimaryAddress.ZipCode,
-		//			Country = patient.PrimaryAddress.Country
-		//		},
-		//		SecondaryAddress = patient.SecondaryAddress != null ? new AddressDto
-		//		{
-		//			Street = patient.SecondaryAddress.Street,
-		//			City = patient.SecondaryAddress.City,
-		//			State = patient.SecondaryAddress.State,
-		//			ZipCode = patient.SecondaryAddress.ZipCode,
-		//			Country = patient.SecondaryAddress.Country
-		//		} : null
-		//	};
-		//}
-
-		//private Patient MapToEntity(PatientDto patientDto)
-		//{
-		//	return new Patient
-		//	{
-		//		FirstName = patientDto.FirstName,
-		//		LastName = patientDto.LastName,
-		//		Gender = patientDto.Gender,
-		//		DateOfBirth = patientDto.DateOfBirth,
-		//		ContactInfos = patientDto.ContactInfos.Select(c => new ContactInfo
-		//		{
-		//			Type = c.Type,
-		//			Value = c.Value
-		//		}).ToList(),
-		//		PrimaryAddress = new Address
-		//		{
-		//			Street = patientDto.PrimaryAddress.Street,
-		//			City = patientDto.PrimaryAddress.City,
-		//			State = patientDto.PrimaryAddress.State,
-		//			ZipCode = patientDto.PrimaryAddress.ZipCode,
-		//			Country = patientDto.PrimaryAddress.Country
-		//		},
-		//		SecondaryAddress = patientDto.SecondaryAddress != null ? new Address
-		//		{
-		//			Street = patientDto.SecondaryAddress.Street,
-		//			City = patientDto.SecondaryAddress.City,
-		//			State = patientDto.SecondaryAddress.State,
-		//			ZipCode = patientDto.SecondaryAddress.ZipCode,
-		//			Country = patientDto.SecondaryAddress.Country
-		//		} : null
-		//	};
-		//}
 	}
 }
