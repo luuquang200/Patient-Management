@@ -3,7 +3,7 @@ name: Deploy to Google Cloud Run
 on:
   push:
     branches:
-      - feat/deployment
+      - feat/deploy
 
 env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
