@@ -17,7 +17,7 @@ namespace PatientManagementApp.Data
 			var connectionString = configuration.GetConnectionString("DefaultConnection");
 
 			var optionsBuilder = new DbContextOptionsBuilder<PatientContext>();
-			optionsBuilder.UseSqlServer(connectionString);
+			optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
 			return new PatientContext(optionsBuilder.Options);
 		}

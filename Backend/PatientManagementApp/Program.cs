@@ -20,7 +20,7 @@ if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Connection string not found in environment variables.");
 }
 builder.Services.AddDbContext<PatientContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientService, PatientService>();
