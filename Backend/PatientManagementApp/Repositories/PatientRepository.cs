@@ -18,6 +18,7 @@ namespace PatientManagementApp.Repositories
 		Task UpdatePatient(Patient patient);
 		Task DeactivatePatient(int id, string reason);
 		Task<bool> PatientExists(List<ContactInfoDto> contactInfos);
+		Task<bool> PatientExists(List<ContactInfoDto> contactInfos, int excludePatientId);
 	}
 	public class PatientRepository : IPatientRepository
 	{
@@ -95,6 +96,12 @@ namespace PatientManagementApp.Repositories
 		{
 			var contactValues = contactInfos.Select(c => c.Value).ToList();
 			return await _context.ContactInfos.AnyAsync(c => contactValues.Contains(c.Value));
+		}
+
+		public async Task<bool> PatientExists(List<ContactInfoDto> contactInfos, int excludePatientId)
+		{
+			var contactValues = contactInfos.Select(c => c.Value).ToList();
+			return await _context.ContactInfos.AnyAsync(c => contactValues.Contains(c.Value) && c.PatientId != excludePatientId);
 		}
 	}
 }

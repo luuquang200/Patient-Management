@@ -72,7 +72,7 @@ namespace PatientManagementApp.Services
 			if (patient != null)
 			{
 				// Check for duplicates
-				bool exists = await _patientRepository.PatientExists(updatePatientDto.ContactInfos);
+				bool exists = await _patientRepository.PatientExists(updatePatientDto.ContactInfos, updatePatientDto.Id);
 				if (exists)
 				{
 					throw new InvalidOperationException("A patient with similar contact information already exists.");
