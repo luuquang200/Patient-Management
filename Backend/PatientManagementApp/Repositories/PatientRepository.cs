@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PatientManagementApp.Data;
+using PatientManagementApp.DTOs;
 using PatientManagementApp.Helpers;
 using PatientManagementApp.Models;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace PatientManagementApp.Repositories
 		Task AddPatient(Patient patient);
 		Task UpdatePatient(Patient patient);
 		Task DeactivatePatient(int id, string reason);
-		Task<bool> PatientExists(int id);
+		Task<bool> PatientExists(List<ContactInfoDto> contactInfos);
 	}
 	public class PatientRepository : IPatientRepository
 	{
@@ -90,9 +91,10 @@ namespace PatientManagementApp.Repositories
 			}
 		}
 
-		public async Task<bool> PatientExists(int id)
+		public async Task<bool> PatientExists(List<ContactInfoDto> contactInfos)
 		{
-			return await _context.Patients.AnyAsync(e => e.PatientId == id);
+			var contactValues = contactInfos.Select(c => c.Value).ToList();
+			return await _context.ContactInfos.AnyAsync(c => contactValues.Contains(c.Value));
 		}
 	}
 }

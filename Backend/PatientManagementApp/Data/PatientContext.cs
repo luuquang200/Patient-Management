@@ -32,6 +32,10 @@ namespace PatientManagementApp.Data
 				.WithOne(c => c.Patient)
 				.HasForeignKey(c => c.PatientId)
 				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<ContactInfo>()
+				.HasIndex(c => c.Value)
+				.IsUnique();
 		}
 	}
 }
