@@ -5,10 +5,12 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CONNECTION_STRING1": "Data Source=LAPTOP-4D049S1C\\SQLEXPRESS;Initial Catalog=PatientManagementDB;Integrated Security=True;Pooling=False",
+        "CONNECTION_STRING": "Server=34.46.4.115; database=PatientManagementDB; User Id=dev;Password=abc@123;"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7022;http://localhost:5029"
+      "applicationUrl": "https://localhost:7022;http://localhost:8082"
     },
     "IIS Express": {
       "commandName": "IISExpress",
