@@ -100,6 +100,12 @@ namespace PatientManagementApp.Controllers
             try
             {
                 var patientDto = await _patientService.UpdatePatient(updatePatientDto);
+                if (patientDto == null)
+                {
+                    response.Success = false;
+                    response.Message = "Patient not found";
+                    return NotFound(response);
+                }
                 response.Message = "Patient updated successfully";
 				response.Data = patientDto;
                 return Ok(response);
