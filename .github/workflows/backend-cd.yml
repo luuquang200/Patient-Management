@@ -1,4 +1,4 @@
-name: Build and deploy Employer Service to Cloud Run
+name: Build and deploy Backend Service to Cloud Run
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
 
 env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
-  CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: ./Backend/PatientManagementApp
 
@@ -23,12 +22,6 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-
-      - name: Build the project
-        run: dotnet build ${{ env.WORKING_DIRECTORY }} --configuration ${{ env.CONFIGURATION }}
-
-      - name: Publish the project
-        run: dotnet publish ${{ env.WORKING_DIRECTORY }} --configuration ${{ env.CONFIGURATION }} --output ${{ env.WORKING_DIRECTORY }}/published
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
