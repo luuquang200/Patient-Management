@@ -15,7 +15,7 @@ namespace PatientManagementApp.Services
 		Task<PaginatedList<PatientDto>> SearchPatients(string? searchTerm, int page, int pageSize);
 		Task<PatientDto?> GetPatientById(int id);
 		Task<PatientDto> AddPatient(CreatePatientDto createPatientDto);
-		Task<PatientDto> UpdatePatient(UpdatePatientDto updatePatientDto);
+		Task<PatientDto?> UpdatePatient(UpdatePatientDto updatePatientDto);
 		Task DeactivatePatient(int id, string reason);
 		
 	}
@@ -54,16 +54,30 @@ namespace PatientManagementApp.Services
 
 		public async Task<PatientDto> AddPatient(CreatePatientDto createPatientDto)
 		{
+			// Check for duplicates
+			bool exists = await _patientRepository.PatientExists(createPatientDto.ContactInfos);
+			if (exists)
+			{
+				throw new InvalidOperationException("A patient with similar contact information already exists.");
+			}
+
 			var patient = PatientMapper.MapToEntity(createPatientDto);
 			await _patientRepository.AddPatient(patient);
 			return PatientMapper.MapToPatientDto(patient);
 		}
 
-		public async Task<PatientDto> UpdatePatient(UpdatePatientDto updatePatientDto)
+		public async Task<PatientDto?> UpdatePatient(UpdatePatientDto updatePatientDto)
 		{
 			var patient = await _patientRepository.GetPatientById(updatePatientDto.Id);
 			if (patient != null)
 			{
+				// Check for duplicates
+				bool exists = await _patientRepository.PatientExists(updatePatientDto.ContactInfos, updatePatientDto.Id);
+				if (exists)
+				{
+					throw new InvalidOperationException("A patient with similar contact information already exists.");
+				}
+
 				patient.FirstName = updatePatientDto.FirstName;
 				patient.LastName = updatePatientDto.LastName;
 				patient.Gender = updatePatientDto.Gender;
@@ -101,7 +115,7 @@ namespace PatientManagementApp.Services
 				await _patientRepository.UpdatePatient(patient);
 				return PatientMapper.MapToPatientDto(patient);
 			}
-			return new PatientDto();	
+			return null;
 		}
 
 		public async Task DeactivatePatient(int id, string reason)
