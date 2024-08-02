@@ -9,8 +9,8 @@ using PatientManagementApp.Data;
 
 namespace PatientManagementApp.Migrations
 {
-    [DbContext(typeof(PatientContext))]
-    partial class PatientContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(Shard1Context))]
+    partial class Shard1ContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -77,7 +77,6 @@ namespace PatientManagementApp.Migrations
             modelBuilder.Entity("PatientManagementApp.Models.Patient", b =>
                 {
                     b.Property<int>("PatientId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateOfBirth")
@@ -135,13 +134,12 @@ namespace PatientManagementApp.Migrations
                     b.HasOne("PatientManagementApp.Models.Address", "PrimaryAddress")
                         .WithMany()
                         .HasForeignKey("PrimaryAddressAddressId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PatientManagementApp.Models.Address", "SecondaryAddress")
                         .WithMany()
-                        .HasForeignKey("SecondaryAddressAddressId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("SecondaryAddressAddressId");
 
                     b.Navigation("PrimaryAddress");
 
