@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace PatientManagementApp.Migrations
+namespace PatientManagementApp.Migrations.Shard2
 {
-    public partial class ReinitInNewDb : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -40,8 +40,7 @@ namespace PatientManagementApp.Migrations
                 name: "Patients",
                 columns: table => new
                 {
-                    PatientId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    PatientId = table.Column<int>(type: "int", nullable: false),
                     FirstName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LastName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
@@ -63,13 +62,12 @@ namespace PatientManagementApp.Migrations
                         column: x => x.PrimaryAddressAddressId,
                         principalTable: "Addresses",
                         principalColumn: "AddressId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Patients_Addresses_SecondaryAddressAddressId",
                         column: x => x.SecondaryAddressAddressId,
                         principalTable: "Addresses",
-                        principalColumn: "AddressId",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "AddressId");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
