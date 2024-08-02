@@ -15,11 +15,14 @@ namespace PatientManagementApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Patient>()
-                .HasKey(p => p.PatientId);
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Patient>()
                 .Property(p => p.PatientId)
                 .ValueGeneratedNever();
+            modelBuilder.Entity<ContactInfo>()
+                .HasIndex(c => c.Value)
+                .IsUnique();
         }
     }
 
@@ -35,11 +38,14 @@ namespace PatientManagementApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Patient>()
-                .HasKey(p => p.PatientId);
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Patient>()
                 .Property(p => p.PatientId)
                 .ValueGeneratedNever();
+            modelBuilder.Entity<ContactInfo>()
+                .HasIndex(c => c.Value)
+                .IsUnique();
         }
     }
 }
