@@ -5,10 +5,10 @@ using PatientManagementApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.WebHost.ConfigureKestrel(options =>
-// {
-// 	options.ListenAnyIP(8082); // HTTP port
-// });
+builder.WebHost.ConfigureKestrel(options =>
+{
+	options.ListenAnyIP(8082); // HTTP port
+});
 
 // Add services to the container.
 builder.Services.AddControllers();
