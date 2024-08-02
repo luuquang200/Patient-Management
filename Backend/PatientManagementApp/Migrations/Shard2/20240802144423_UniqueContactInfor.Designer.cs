@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatientManagementApp.Data;
 
@@ -10,9 +11,10 @@ using PatientManagementApp.Data;
 namespace PatientManagementApp.Migrations.Shard2
 {
     [DbContext(typeof(Shard2Context))]
-    partial class Shard2ContextModelSnapshot : ModelSnapshot
+    [Migration("20240802144423_UniqueContactInfor")]
+    partial class UniqueContactInfor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

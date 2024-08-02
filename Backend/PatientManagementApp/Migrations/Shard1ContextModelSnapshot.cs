@@ -65,11 +65,14 @@ namespace PatientManagementApp.Migrations
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("ContactInfoId");
 
                     b.HasIndex("PatientId");
+
+                    b.HasIndex("Value")
+                        .IsUnique();
 
                     b.ToTable("ContactInfos");
                 });
