@@ -8,11 +8,11 @@ using PatientManagementApp.Data;
 
 #nullable disable
 
-namespace PatientManagementApp.Migrations
+namespace PatientManagementApp.Migrations.Shard2
 {
-    [DbContext(typeof(Shard1Context))]
-    [Migration("20240802095051_InitialCreate")]
-    partial class InitialCreate
+    [DbContext(typeof(Shard2Context))]
+    [Migration("20240803071215_InitDb")]
+    partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -58,8 +58,8 @@ namespace PatientManagementApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -67,19 +67,22 @@ namespace PatientManagementApp.Migrations
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("ContactInfoId");
 
                     b.HasIndex("PatientId");
+
+                    b.HasIndex("Value")
+                        .IsUnique();
 
                     b.ToTable("ContactInfos");
                 });
 
             modelBuilder.Entity("PatientManagementApp.Models.Patient", b =>
                 {
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime(6)");
@@ -136,12 +139,13 @@ namespace PatientManagementApp.Migrations
                     b.HasOne("PatientManagementApp.Models.Address", "PrimaryAddress")
                         .WithMany()
                         .HasForeignKey("PrimaryAddressAddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PatientManagementApp.Models.Address", "SecondaryAddress")
                         .WithMany()
-                        .HasForeignKey("SecondaryAddressAddressId");
+                        .HasForeignKey("SecondaryAddressAddressId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("PrimaryAddress");
 
