@@ -56,8 +56,8 @@ namespace PatientManagementApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -65,19 +65,22 @@ namespace PatientManagementApp.Migrations
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("ContactInfoId");
 
                     b.HasIndex("PatientId");
+
+                    b.HasIndex("Value")
+                        .IsUnique();
 
                     b.ToTable("ContactInfos");
                 });
 
             modelBuilder.Entity("PatientManagementApp.Models.Patient", b =>
                 {
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime(6)");
@@ -134,12 +137,13 @@ namespace PatientManagementApp.Migrations
                     b.HasOne("PatientManagementApp.Models.Address", "PrimaryAddress")
                         .WithMany()
                         .HasForeignKey("PrimaryAddressAddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PatientManagementApp.Models.Address", "SecondaryAddress")
                         .WithMany()
-                        .HasForeignKey("SecondaryAddressAddressId");
+                        .HasForeignKey("SecondaryAddressAddressId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("PrimaryAddress");
 

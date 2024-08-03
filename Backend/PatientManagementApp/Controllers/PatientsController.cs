@@ -65,7 +65,7 @@ namespace PatientManagementApp.Controllers
 
         // GET: api/patients/get/{id}
         [HttpGet("get/{id}")]
-        public async Task<ActionResult<ApiResponse<PatientDto>>> GetPatient(int id)
+        public async Task<ActionResult<ApiResponse<PatientDto>>> GetPatient(Guid id)
         {
             var response = new ApiResponse<PatientDto>();
 
@@ -121,7 +121,7 @@ namespace PatientManagementApp.Controllers
 
         // DELETE: api/patients/deactivate/{id}
         [HttpDelete("deactivate/{id}")]
-        public async Task<ActionResult<ApiResponse<string>>> DeactivatePatient(int id, [FromBody] string reason)
+        public async Task<ActionResult<ApiResponse<string>>> DeactivatePatient(Guid id, [FromBody] string reason)
         {
             var response = new ApiResponse<string>();
 
