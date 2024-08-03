@@ -11,7 +11,7 @@ using PatientManagementApp.Data;
 namespace PatientManagementApp.Migrations.Shard2
 {
     [DbContext(typeof(Shard2Context))]
-    [Migration("20240802161329_InitDb")]
+    [Migration("20240803071215_InitDb")]
     partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,8 +58,8 @@ namespace PatientManagementApp.Migrations.Shard2
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -81,8 +81,8 @@ namespace PatientManagementApp.Migrations.Shard2
 
             modelBuilder.Entity("PatientManagementApp.Models.Patient", b =>
                 {
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime(6)");

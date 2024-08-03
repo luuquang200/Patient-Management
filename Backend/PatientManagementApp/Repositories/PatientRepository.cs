@@ -4,73 +4,75 @@ using PatientManagementApp.DTOs;
 using PatientManagementApp.Helpers;
 using PatientManagementApp.Models;
 using PatientManagementApp.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace PatientManagementApp.Repositories
 {
-    public interface IPatientRepository
-    {
-        Task<IEnumerable<Patient>> GetPatients();
-        Task<PaginatedList<Patient>> SearchPatients(string? searchTerm, int page, int pageSize);
-        Task<Patient> GetPatientById(int id);
-        Task AddPatient(Patient patient);
-		//Task UpdatePatient(Patient patient);
+	public interface IPatientRepository
+	{
+		Task<IEnumerable<Patient>> GetPatients();
+		Task<PaginatedList<Patient>> SearchPatients(string? searchTerm, int page, int pageSize);
+		Task<Patient> GetPatientById(Guid id);
+		Task AddPatient(Patient patient);
 		Task<Patient?> UpdatePatient(UpdatePatientDto updatePatientDto);
-		Task DeactivatePatient(int id, string reason);
-        Task<bool> PatientExists(List<ContactInfoDto> contactInfos);
-        Task<bool> PatientExists(List<ContactInfoDto> contactInfos, int excludePatientId);
-    }
+		Task DeactivatePatient(Guid id, string reason);
+		Task<bool> PatientExists(List<ContactInfoDto> contactInfos);
+		Task<bool> PatientExists(List<ContactInfoDto> contactInfos, Guid excludePatientId);
+	}
 
-    public class PatientRepository : IPatientRepository
-    {
-        private readonly Shard1Context _shard1ContextMaster;
-        private readonly Shard2Context _shard2ContextMaster;
-        private readonly Shard1Context _shard1ContextReplica;
-        private readonly Shard2Context _shard2ContextReplica;
-        private readonly IGeneratorIdService _generatorIdService;
+	public class PatientRepository : IPatientRepository
+	{
+		private readonly Shard1Context _shard1ContextMaster;
+		private readonly Shard2Context _shard2ContextMaster;
+		private readonly Shard1Context _shard1ContextReplica;
+		private readonly Shard2Context _shard2ContextReplica;
+		private readonly IGeneratorIdService _generatorIdService;
 
-        public PatientRepository(
-            Shard1Context shard1ContextMaster,
-            Shard2Context shard2ContextMaster,
-            Shard1Context shard1ContextReplica,
-            Shard2Context shard2ContextReplica,
-            IGeneratorIdService generatorIdService)
-        {
-            _shard1ContextMaster = shard1ContextMaster;
-            _shard2ContextMaster = shard2ContextMaster;
-            _shard1ContextReplica = shard1ContextReplica;
-            _shard2ContextReplica = shard2ContextReplica;
-            _generatorIdService = generatorIdService;
-        }
+		public PatientRepository(
+			Shard1Context shard1ContextMaster,
+			Shard2Context shard2ContextMaster,
+			Shard1Context shard1ContextReplica,
+			Shard2Context shard2ContextReplica,
+			IGeneratorIdService generatorIdService)
+		{
+			_shard1ContextMaster = shard1ContextMaster;
+			_shard2ContextMaster = shard2ContextMaster;
+			_shard1ContextReplica = shard1ContextReplica;
+			_shard2ContextReplica = shard2ContextReplica;
+			_generatorIdService = generatorIdService;
+		}
 
-        private DbContext GetMasterContext(long patientId)
-        {
-            Console.WriteLine($"Sharid DB: {patientId % 2}");
-            return (patientId % 2 == 0) ? _shard2ContextMaster : _shard1ContextMaster;
-        }
+		private DbContext GetMasterContext(Guid patientId)
+		{
+			// Simplified sharding logic, for example:
+			var shardId = patientId.GetHashCode() % 2;
+			return (shardId == 0) ? _shard2ContextMaster : _shard1ContextMaster;
+		}
 
-        private DbContext GetReplicaContext(long patientId)
-        {
-            return (patientId % 2 == 0) ? _shard2ContextReplica : _shard1ContextReplica;
-        }
+		private DbContext GetReplicaContext(Guid patientId)
+		{
+			var shardId = patientId.GetHashCode() % 2;
+			return (shardId == 0) ? _shard2ContextReplica : _shard1ContextReplica;
+		}
 
-        public async Task<IEnumerable<Patient>> GetPatients()
-        {
-            var patientsShard1 = _shard1ContextReplica.Patients.Include(p => p.ContactInfos)
-																.Include(p => p.PrimaryAddress)
-																.Include(p => p.SecondaryAddress)
-																.ToListAsync();
+		public async Task<IEnumerable<Patient>> GetPatients()
+		{
+			var patientsShard1 = _shard1ContextReplica.Patients.Include(p => p.ContactInfos)
+				.Include(p => p.PrimaryAddress)
+				.Include(p => p.SecondaryAddress)
+				.ToListAsync();
 
 			var patientsShard2 = _shard2ContextReplica.Patients.Include(p => p.ContactInfos)
-				                                                .Include(p => p.PrimaryAddress)
-																.Include(p => p.SecondaryAddress)
-																.ToListAsync();
+				.Include(p => p.PrimaryAddress)
+				.Include(p => p.SecondaryAddress)
+				.ToListAsync();
 
 			await Task.WhenAll(patientsShard1, patientsShard2);
-            return patientsShard1.Result.Concat(patientsShard2.Result);
-        }
+			return patientsShard1.Result.Concat(patientsShard2.Result);
+		}
 
 		public async Task<PaginatedList<Patient>> SearchPatients(string? searchTerm, int page, int pageSize)
 		{
@@ -115,28 +117,20 @@ namespace PatientManagementApp.Repositories
 			return new PaginatedList<Patient>(items, count, page, pageSize);
 		}
 
-		public async Task<Patient> GetPatientById(int id)
-        {
-            var context = GetReplicaContext(id);
-            return await context.Set<Patient>().Include(p => p.ContactInfos)
-                                         .Include(p => p.PrimaryAddress)
-                                         .Include(p => p.SecondaryAddress)
-                                         .FirstOrDefaultAsync(p => p.PatientId == id);
-        }
-
-        public async Task AddPatient(Patient patient)
-        {
-            patient.PatientId = _generatorIdService.GenerateId();
-            var context = GetMasterContext(patient.PatientId);
-            context.Set<Patient>().Add(patient);
-            await context.SaveChangesAsync();
-        }
-
-		public async Task UpdatePatient(Patient patient)
+		public async Task<Patient> GetPatientById(Guid id)
 		{
-			var context = GetMasterContext(patient.PatientId);
-			context.Set<Patient>().Update(patient);
+			var context = GetReplicaContext(id);
+			return await context.Set<Patient>().Include(p => p.ContactInfos)
+				.Include(p => p.PrimaryAddress)
+				.Include(p => p.SecondaryAddress)
+				.FirstOrDefaultAsync(p => p.PatientId == id);
+		}
 
+		public async Task AddPatient(Patient patient)
+		{
+			patient.PatientId = _generatorIdService.GenerateId();
+			var context = GetMasterContext(patient.PatientId);
+			context.Set<Patient>().Add(patient);
 			await context.SaveChangesAsync();
 		}
 
@@ -202,18 +196,18 @@ namespace PatientManagementApp.Repositories
 			return patient;
 		}
 
-		public async Task DeactivatePatient(int id, string reason)
-        {
-            var context = GetMasterContext(id);
-            var patient = await context.Set<Patient>().FindAsync(id);
-            if (patient != null)
-            {
-                patient.IsActive = false;
-                patient.InactiveReason = reason;
-                context.Set<Patient>().Update(patient);
-                await context.SaveChangesAsync();
-            }
-        }
+		public async Task DeactivatePatient(Guid id, string reason)
+		{
+			var context = GetMasterContext(id);
+			var patient = await context.Set<Patient>().FindAsync(id);
+			if (patient != null)
+			{
+				patient.IsActive = false;
+				patient.InactiveReason = reason;
+				context.Set<Patient>().Update(patient);
+				await context.SaveChangesAsync();
+			}
+		}
 
 		public async Task<bool> PatientExists(List<ContactInfoDto> contactInfos)
 		{
@@ -227,9 +221,17 @@ namespace PatientManagementApp.Repositories
 			return results.Any(result => result);
 		}
 
-		public async Task<bool> PatientExists(List<ContactInfoDto> contactInfos, int excludePatientId)
+		public async Task<bool> PatientExists(List<ContactInfoDto> contactInfos, Guid excludePatientId)
 		{
 			var contactValues = contactInfos.Select(c => c.Value).ToList();
+
+			foreach (var contactInfo in _shard1ContextReplica.ContactInfos)
+			{
+				if (contactValues.Contains(contactInfo.Value) && contactInfo.PatientId != excludePatientId)
+				{
+					return true;
+				}
+			}
 
 			var shard1Task = _shard1ContextReplica.ContactInfos.AnyAsync(c => contactValues.Contains(c.Value) && c.PatientId != excludePatientId);
 			var shard2Task = _shard2ContextReplica.ContactInfos.AnyAsync(c => contactValues.Contains(c.Value) && c.PatientId != excludePatientId);

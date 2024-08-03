@@ -13,10 +13,10 @@ namespace PatientManagementApp.Services
 	{
 		Task<IEnumerable<PatientDto>> GetPatients();
 		Task<PaginatedList<PatientDto>> SearchPatients(string? searchTerm, int page, int pageSize);
-		Task<PatientDto?> GetPatientById(int id);
+		Task<PatientDto?> GetPatientById(Guid id);
 		Task<PatientDto> AddPatient(CreatePatientDto createPatientDto);
 		Task<PatientDto?> UpdatePatient(UpdatePatientDto updatePatientDto);
-		Task DeactivatePatient(int id, string reason);
+		Task DeactivatePatient(Guid id, string reason);
 		
 	}
 	public class PatientService : IPatientService
@@ -42,7 +42,7 @@ namespace PatientManagementApp.Services
 			return new PaginatedList<PatientDto>(patientDtos, paginatedPatients.TotalCount, paginatedPatients.PageIndex, pageSize);
 		}
 
-		public async Task<PatientDto?> GetPatientById(int id)
+		public async Task<PatientDto?> GetPatientById(Guid id)
 		{
 			var patient = await _patientRepository.GetPatientById(id);
 			if (patient != null)
@@ -81,7 +81,7 @@ namespace PatientManagementApp.Services
 
 
 
-		public async Task DeactivatePatient(int id, string reason)
+		public async Task DeactivatePatient(Guid id, string reason)
 		{
 			await _patientRepository.DeactivatePatient(id, reason);
 		}
