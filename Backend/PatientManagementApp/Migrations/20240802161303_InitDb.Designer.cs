@@ -11,8 +11,8 @@ using PatientManagementApp.Data;
 namespace PatientManagementApp.Migrations
 {
     [DbContext(typeof(Shard1Context))]
-    [Migration("20240802095051_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240802161303_InitDb")]
+    partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -67,11 +67,14 @@ namespace PatientManagementApp.Migrations
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("ContactInfoId");
 
                     b.HasIndex("PatientId");
+
+                    b.HasIndex("Value")
+                        .IsUnique();
 
                     b.ToTable("ContactInfos");
                 });
@@ -136,12 +139,13 @@ namespace PatientManagementApp.Migrations
                     b.HasOne("PatientManagementApp.Models.Address", "PrimaryAddress")
                         .WithMany()
                         .HasForeignKey("PrimaryAddressAddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PatientManagementApp.Models.Address", "SecondaryAddress")
                         .WithMany()
-                        .HasForeignKey("SecondaryAddressAddressId");
+                        .HasForeignKey("SecondaryAddressAddressId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("PrimaryAddress");
 

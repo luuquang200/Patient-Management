@@ -15,15 +15,32 @@ namespace PatientManagementApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+			modelBuilder.Entity<Patient>()
+				.Property(p => p.PatientId)
+				.ValueGeneratedNever();
 
-            modelBuilder.Entity<Patient>()
-                .Property(p => p.PatientId)
-                .ValueGeneratedNever();
-            modelBuilder.Entity<ContactInfo>()
-                .HasIndex(c => c.Value)
-                .IsUnique();
-        }
+			modelBuilder.Entity<Patient>()
+				.HasOne(p => p.PrimaryAddress)
+				.WithMany()
+				.IsRequired(true)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Patient>()
+				.HasOne(p => p.SecondaryAddress)
+				.WithMany()
+				.IsRequired(false)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Patient>()
+				.HasMany(p => p.ContactInfos)
+				.WithOne(c => c.Patient)
+				.HasForeignKey(c => c.PatientId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<ContactInfo>()
+				.HasIndex(c => c.Value)
+				.IsUnique();
+		}
     }
 
 	public class Shard2Context : DbContext
@@ -38,14 +55,31 @@ namespace PatientManagementApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<Patient>()
                 .Property(p => p.PatientId)
                 .ValueGeneratedNever();
-            modelBuilder.Entity<ContactInfo>()
-                .HasIndex(c => c.Value)
-                .IsUnique();
-        }
+
+			modelBuilder.Entity<Patient>()
+				.HasOne(p => p.PrimaryAddress)
+				.WithMany()
+				.IsRequired(true)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Patient>()
+				.HasOne(p => p.SecondaryAddress)
+				.WithMany()
+				.IsRequired(false)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Patient>()
+				.HasMany(p => p.ContactInfos)
+				.WithOne(c => c.Patient)
+				.HasForeignKey(c => c.PatientId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<ContactInfo>()
+				.HasIndex(c => c.Value)
+				.IsUnique();
+		}
     }
 }

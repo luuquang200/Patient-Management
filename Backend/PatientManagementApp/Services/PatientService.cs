@@ -68,55 +68,18 @@ namespace PatientManagementApp.Services
 
 		public async Task<PatientDto?> UpdatePatient(UpdatePatientDto updatePatientDto)
 		{
-			var patient = await _patientRepository.GetPatientById(updatePatientDto.Id);
-			if (patient != null)
+			// Check for duplicates
+			bool exists = await _patientRepository.PatientExists(updatePatientDto.ContactInfos, updatePatientDto.Id);
+			if (exists)
 			{
-				// Check for duplicates
-				bool exists = await _patientRepository.PatientExists(updatePatientDto.ContactInfos, updatePatientDto.Id);
-				if (exists)
-				{
-					throw new InvalidOperationException("A patient with similar contact information already exists.");
-				}
-
-				patient.FirstName = updatePatientDto.FirstName;
-				patient.LastName = updatePatientDto.LastName;
-				patient.Gender = updatePatientDto.Gender;
-				patient.DateOfBirth = updatePatientDto.DateOfBirth;
-				patient.ContactInfos = updatePatientDto.ContactInfos.Select(c => new ContactInfo
-				{
-					Type = c.Type,
-					Value = c.Value
-				}).ToList();
-				patient.PrimaryAddress = new Address
-				{
-					Street = updatePatientDto.PrimaryAddress.Street,
-					City = updatePatientDto.PrimaryAddress.City,
-					State = updatePatientDto.PrimaryAddress.State,
-					ZipCode = updatePatientDto.PrimaryAddress.ZipCode,
-					Country = updatePatientDto.PrimaryAddress.Country
-				};
-
-				if (updatePatientDto.SecondaryAddress != null)
-				{
-					patient.SecondaryAddress = new Address
-					{
-						Street = updatePatientDto.SecondaryAddress.Street,
-						City = updatePatientDto.SecondaryAddress.City,
-						State = updatePatientDto.SecondaryAddress.State,
-						ZipCode = updatePatientDto.SecondaryAddress.ZipCode,
-						Country = updatePatientDto.SecondaryAddress.Country
-					};
-				}
-				else
-				{
-					patient.SecondaryAddress = null;
-				}
-
-				await _patientRepository.UpdatePatient(patient);
-				return PatientMapper.MapToPatientDto(patient);
+				throw new InvalidOperationException("A patient with similar contact information already exists.");
 			}
-			return null;
+
+			var updatedPatient = await _patientRepository.UpdatePatient(updatePatientDto);
+			return updatedPatient != null ? PatientMapper.MapToPatientDto(updatedPatient) : null;
 		}
+
+
 
 		public async Task DeactivatePatient(int id, string reason)
 		{

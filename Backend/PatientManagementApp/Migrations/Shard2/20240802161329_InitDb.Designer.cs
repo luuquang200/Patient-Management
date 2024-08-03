@@ -8,11 +8,11 @@ using PatientManagementApp.Data;
 
 #nullable disable
 
-namespace PatientManagementApp.Migrations
+namespace PatientManagementApp.Migrations.Shard2
 {
-    [DbContext(typeof(Shard1Context))]
-    [Migration("20240802144353_UniqueContactInfor")]
-    partial class UniqueContactInfor
+    [DbContext(typeof(Shard2Context))]
+    [Migration("20240802161329_InitDb")]
+    partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -139,12 +139,13 @@ namespace PatientManagementApp.Migrations
                     b.HasOne("PatientManagementApp.Models.Address", "PrimaryAddress")
                         .WithMany()
                         .HasForeignKey("PrimaryAddressAddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PatientManagementApp.Models.Address", "SecondaryAddress")
                         .WithMany()
-                        .HasForeignKey("SecondaryAddressAddressId");
+                        .HasForeignKey("SecondaryAddressAddressId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("PrimaryAddress");
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PatientManagementApp.Migrations.Shard2
 {
-    public partial class InitialCreate : Migration
+    public partial class InitDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -62,12 +62,13 @@ namespace PatientManagementApp.Migrations.Shard2
                         column: x => x.PrimaryAddressAddressId,
                         principalTable: "Addresses",
                         principalColumn: "AddressId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Patients_Addresses_SecondaryAddressAddressId",
                         column: x => x.SecondaryAddressAddressId,
                         principalTable: "Addresses",
-                        principalColumn: "AddressId");
+                        principalColumn: "AddressId",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -79,7 +80,7 @@ namespace PatientManagementApp.Migrations.Shard2
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Type = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Value = table.Column<string>(type: "longtext", nullable: false)
+                    Value = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PatientId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -99,6 +100,12 @@ namespace PatientManagementApp.Migrations.Shard2
                 name: "IX_ContactInfos_PatientId",
                 table: "ContactInfos",
                 column: "PatientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ContactInfos_Value",
+                table: "ContactInfos",
+                column: "Value",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Patients_PrimaryAddressAddressId",

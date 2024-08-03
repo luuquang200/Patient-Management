@@ -137,12 +137,13 @@ namespace PatientManagementApp.Migrations.Shard2
                     b.HasOne("PatientManagementApp.Models.Address", "PrimaryAddress")
                         .WithMany()
                         .HasForeignKey("PrimaryAddressAddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PatientManagementApp.Models.Address", "SecondaryAddress")
                         .WithMany()
-                        .HasForeignKey("SecondaryAddressAddressId");
+                        .HasForeignKey("SecondaryAddressAddressId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("PrimaryAddress");
 
