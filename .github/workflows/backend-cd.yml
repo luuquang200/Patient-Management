@@ -3,7 +3,7 @@ name: Build and deploy Backend Service to Cloud Run
 on:
   push:
     branches:
-    - feat/deploy
+    - main
 
 env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
