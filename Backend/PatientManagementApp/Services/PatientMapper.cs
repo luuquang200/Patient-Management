@@ -13,7 +13,7 @@ namespace PatientManagementApp.Services
 				FirstName = patient.FirstName,
 				LastName = patient.LastName,
 				Gender = patient.Gender,
-				DateOfBirth = patient.DateOfBirth,
+				DateOfBirth = patient.DateOfBirth.Date,
 				ContactInfos = patient.ContactInfos.Select(c => new ContactInfoDto
 				{
 					Type = c.Type,
@@ -47,7 +47,7 @@ namespace PatientManagementApp.Services
 				FirstName = createPatientDto.FirstName,
 				LastName = createPatientDto.LastName,
 				Gender = createPatientDto.Gender,
-				DateOfBirth = createPatientDto.DateOfBirth,
+				DateOfBirth = createPatientDto.DateOfBirth.Date,
 				ContactInfos = createPatientDto.ContactInfos.Select(c => new ContactInfo
 				{
 					Type = c.Type,

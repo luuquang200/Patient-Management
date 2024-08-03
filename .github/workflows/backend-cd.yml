@@ -1,0 +1,46 @@
+name: Build and deploy Backend Service to Cloud Run
+
+on:
+  push:
+    branches:
+    - feat/deploy
+
+env:
+  GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+  DOTNET_CORE_VERSION: 6.0.x
+  WORKING_DIRECTORY: ./Backend/PatientManagementApp
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure gcloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build and push Docker image
+        run: |
+          cd ${{ env.WORKING_DIRECTORY }}
+          IMAGE_NAME=gcr.io/${{ env.GCP_PROJECT }}/patient-service
+          gcloud builds submit --tag $IMAGE_NAME .
+
+      - name: Deploy to Cloud Run
+        run: |
+          IMAGE_NAME=gcr.io/${{ env.GCP_PROJECT }}/patient-service
+          gcloud run deploy patient-service --image $IMAGE_NAME --region us-central1 --platform managed --allow-unauthenticated

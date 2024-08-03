@@ -5,10 +5,42 @@ using PatientManagementApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddDbContext<PatientContext>(options =>
-	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Read connection string from environment variable
+var shard1MasterConnection = Environment.GetEnvironmentVariable("SHARD1_MASTER_CONNECTION");
+var shard2MasterConnection = Environment.GetEnvironmentVariable("SHARD2_MASTER_CONNECTION");
+var shard1ReplicaConnection = Environment.GetEnvironmentVariable("SHARD1_REPLICA_CONNECTION");
+var shard2ReplicaConnection = Environment.GetEnvironmentVariable("SHARD2_REPLICA_CONNECTION");
+
+if (string.IsNullOrEmpty(shard1MasterConnection) || string.IsNullOrEmpty(shard2MasterConnection) ||
+    string.IsNullOrEmpty(shard1ReplicaConnection) || string.IsNullOrEmpty(shard2ReplicaConnection))
+{
+    throw new InvalidOperationException("Connection strings not found in environment variables.");
+}
+
+builder.Services.AddDbContext<Shard1Context>(options =>
+    options.UseMySql(shard1MasterConnection, ServerVersion.AutoDetect(shard1MasterConnection)), ServiceLifetime.Transient);
+
+builder.Services.AddDbContext<Shard2Context>(options =>
+    options.UseMySql(shard2MasterConnection, ServerVersion.AutoDetect(shard2MasterConnection)), ServiceLifetime.Transient);
+
+builder.Services.AddDbContext<Shard1Context>(options =>
+    options.UseMySql(shard1ReplicaConnection, ServerVersion.AutoDetect(shard1ReplicaConnection)), ServiceLifetime.Transient);
+
+builder.Services.AddDbContext<Shard2Context>(options =>
+    options.UseMySql(shard2ReplicaConnection, ServerVersion.AutoDetect(shard2ReplicaConnection)), ServiceLifetime.Transient);
+
+builder.Services.AddSingleton<IGeneratorIdService, GeneratorIdService>();
 
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientService, PatientService>();
@@ -18,6 +50,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseCors("AllowAllOrigins");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
