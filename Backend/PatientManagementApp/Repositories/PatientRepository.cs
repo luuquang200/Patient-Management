@@ -165,7 +165,12 @@ namespace PatientManagementApp.Repositories
 			}
 
 			// Update the secondary address
-			if (updatePatientDto.SecondaryAddress != null)
+			if (IsAddressNullOrEmpty(updatePatientDto.SecondaryAddress))
+			{
+				// If the secondary address is empty, remove it
+				patient.SecondaryAddress = null;
+			}
+			else
 			{
 				if (patient.SecondaryAddress == null)
 				{
@@ -176,10 +181,6 @@ namespace PatientManagementApp.Repositories
 				patient.SecondaryAddress.State = updatePatientDto.SecondaryAddress.State;
 				patient.SecondaryAddress.ZipCode = updatePatientDto.SecondaryAddress.ZipCode;
 				patient.SecondaryAddress.Country = updatePatientDto.SecondaryAddress.Country;
-			}
-			else
-			{
-				patient.SecondaryAddress = null;
 			}
 
 			// Remove old contact infos
@@ -194,6 +195,16 @@ namespace PatientManagementApp.Repositories
 
 			await context.SaveChangesAsync();
 			return patient;
+		}
+
+		private bool IsAddressNullOrEmpty(AddressDto? address)
+		{
+			return address == null ||
+				   string.IsNullOrWhiteSpace(address.Street) &&
+				   string.IsNullOrWhiteSpace(address.City) &&
+				   string.IsNullOrWhiteSpace(address.State) &&
+				   string.IsNullOrWhiteSpace(address.ZipCode) &&
+				   string.IsNullOrWhiteSpace(address.Country);
 		}
 
 		public async Task DeactivatePatient(Guid id, string reason)
