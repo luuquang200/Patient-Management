@@ -61,15 +61,26 @@ namespace PatientManagementApp.Services
 					ZipCode = createPatientDto.PrimaryAddress.ZipCode,
 					Country = createPatientDto.PrimaryAddress.Country
 				},
-				SecondaryAddress = createPatientDto.SecondaryAddress != null ? new Address
+				SecondaryAddress = IsAddressNullOrEmpty(createPatientDto.SecondaryAddress) ? null : new Address
 				{
-					Street = createPatientDto.SecondaryAddress.Street,
+					Street = createPatientDto.SecondaryAddress!.Street,
 					City = createPatientDto.SecondaryAddress.City,
 					State = createPatientDto.SecondaryAddress.State,
 					ZipCode = createPatientDto.SecondaryAddress.ZipCode,
 					Country = createPatientDto.SecondaryAddress.Country
-				} : null
+				}
 			};
 		}
+
+		private static bool IsAddressNullOrEmpty(AddressDto? address)
+		{
+			return address == null ||
+				   string.IsNullOrWhiteSpace(address.Street) &&
+				   string.IsNullOrWhiteSpace(address.City) &&
+				   string.IsNullOrWhiteSpace(address.State) &&
+				   string.IsNullOrWhiteSpace(address.ZipCode) &&
+				   string.IsNullOrWhiteSpace(address.Country);
+		}
+
 	}
 }
