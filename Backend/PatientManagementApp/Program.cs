@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using PatientManagementApp.Data;
+using PatientManagementApp.DTOs;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.Extensions.DependencyInjection;
 using PatientManagementApp.Repositories;
 using PatientManagementApp.Services;
 
@@ -13,8 +17,17 @@ builder.Services.AddCors(options =>
                           .AllowAnyMethod());
 });
 
+// Register FluentValidation validators
+builder.Services.AddTransient<IValidator<CreatePatientDto>, CreatePatientDtoValidator>();
+builder.Services.AddTransient<IValidator<UpdatePatientDto>, UpdatePatientDtoValidator>();
+
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Add FluentValidation services to the ASP.NET Core pipeline
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+
 
 // Read connection string from environment variable
 var shard1MasterConnection = Environment.GetEnvironmentVariable("SHARD1_MASTER_CONNECTION");

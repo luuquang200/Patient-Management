@@ -95,7 +95,7 @@ namespace PatientManagementApp.Controllers
         [HttpPut("update")]
         public async Task<ActionResult<ApiResponse<PatientDto>>> UpdatePatient([FromBody] UpdatePatientDto updatePatientDto)
         {
-            var response = new ApiResponse<PatientDto>();
+			var response = new ApiResponse<PatientDto>();
 
             try
             {
