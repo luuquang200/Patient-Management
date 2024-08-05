@@ -84,20 +84,6 @@ namespace PatientManagementApp.Repositories
 				.Include(p => p.PrimaryAddress)
 				.Include(p => p.SecondaryAddress);
 
-			if (!string.IsNullOrEmpty(searchTerm))
-			{
-				query1 = query1.Where(p => p.FirstName.Contains(searchTerm) ||
-										   p.LastName.Contains(searchTerm) ||
-										   p.DateOfBirth.Date.ToString().Contains(searchTerm) ||
-										   p.ContactInfos.Any(c => c.Value.Contains(searchTerm)));
-
-				query2 = query2.Where(p => p.FirstName.Contains(searchTerm) ||
-										   p.LastName.Contains(searchTerm) ||
-										   p.DateOfBirth.Date.ToString().Contains(searchTerm) ||
-										   p.ContactInfos.Any(c => c.Value.Contains(searchTerm)));
-			}
-
-			// Execute queries concurrently
 			var results1Task = query1.ToListAsync();
 			var results2Task = query2.ToListAsync();
 
@@ -108,7 +94,18 @@ namespace PatientManagementApp.Repositories
 
 			var combinedResults = results1.Concat(results2).ToList();
 
-			// Implementing pagination manually
+			if (!string.IsNullOrEmpty(searchTerm))
+			{
+				var searchTerms = searchTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+				combinedResults = combinedResults.Where(p =>
+					searchTerms.Any(term =>
+						p.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+						p.LastName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+						p.DateOfBirth.ToString("dd-MM-yyyy").Contains(term) ||
+						p.ContactInfos.Any(c => c.Value.Contains(term, StringComparison.OrdinalIgnoreCase))
+					)).ToList();
+			}
+
 			var count = combinedResults.Count();
 			var items = combinedResults.Skip((page - 1) * pageSize)
 									   .Take(pageSize)
