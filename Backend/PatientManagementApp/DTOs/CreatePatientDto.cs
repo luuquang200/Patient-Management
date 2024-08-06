@@ -43,10 +43,6 @@ namespace PatientManagementApp.DTOs
 			RuleFor(x => x.PrimaryAddress)
 				.NotNull().WithMessage("Primary address is required.")
 				.SetValidator(new AddressDtoValidator());
-
-			RuleFor(x => x.SecondaryAddress)
-				.SetValidator(new NullableAddressDtoValidator())
-				.When(x => x.SecondaryAddress != null);
 		}
 	}
 
