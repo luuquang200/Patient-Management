@@ -6,6 +6,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using PatientManagementApp.Repositories;
 using PatientManagementApp.Services;
+using PatientManagementApp;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,5 +77,23 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Seed data
+//using (var scope = app.Services.CreateScope())
+//{
+//	var services = scope.ServiceProvider;
+//	try
+//	{
+//		var shard1Context = services.GetRequiredService<Shard1Context>();
+//		var shard2Context = services.GetRequiredService<Shard2Context>();
+
+//		DataSeeder.SeedDataAsync(shard1Context, shard2Context).Wait();
+//	}
+//	catch (Exception ex)
+//	{
+//		// Handle exceptions
+//		Console.WriteLine($"An error occurred seeding the DB: {ex.Message}");
+//	}
+//}
 
 app.Run();

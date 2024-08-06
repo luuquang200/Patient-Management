@@ -47,7 +47,6 @@ namespace PatientManagementApp.Repositories
 
 		private DbContext GetMasterContext(Guid patientId)
 		{
-			// Simplified sharding logic, for example:
 			var shardId = patientId.GetHashCode() % 2;
 			return (shardId == 0) ? _shard2ContextMaster : _shard1ContextMaster;
 		}
@@ -76,13 +75,15 @@ namespace PatientManagementApp.Repositories
 
 		public async Task<PaginatedList<Patient>> SearchPatients(string? searchTerm, int page, int pageSize)
 		{
-			IQueryable<Patient> query1 = _shard1ContextReplica.Patients.Include(p => p.ContactInfos)
-				.Include(p => p.PrimaryAddress)
-				.Include(p => p.SecondaryAddress);
+			IQueryable<Patient> query1 = _shard1ContextReplica.Patients.AsNoTracking()
+																	   .Include(p => p.ContactInfos)
+																	   .Include(p => p.PrimaryAddress)
+																	   .Include(p => p.SecondaryAddress);
 
-			IQueryable<Patient> query2 = _shard2ContextReplica.Patients.Include(p => p.ContactInfos)
-				.Include(p => p.PrimaryAddress)
-				.Include(p => p.SecondaryAddress);
+			IQueryable<Patient> query2 = _shard2ContextReplica.Patients.AsNoTracking()
+																	   .Include(p => p.ContactInfos)
+																	   .Include(p => p.PrimaryAddress)
+																	   .Include(p => p.SecondaryAddress);
 
 			if (!string.IsNullOrEmpty(searchTerm))
 			{
@@ -91,31 +92,34 @@ namespace PatientManagementApp.Repositories
 				foreach (var term in searchTerms)
 				{
 					query1 = query1.Where(p => p.FirstName.Contains(term) ||
-											p.LastName.Contains(term) ||
-											p.DateOfBirth.Date.ToString().Contains(term) ||
-											p.ContactInfos.Any(c => c.Value.Contains(term)));
+											   p.LastName.Contains(term) ||
+											   p.DateOfBirth.Date.ToString().Contains(term) ||
+											   p.ContactInfos.Any(c => c.Value.Contains(term)));
 
 					query2 = query2.Where(p => p.FirstName.Contains(term) ||
-											p.LastName.Contains(term) ||
-											p.DateOfBirth.Date.ToString().Contains(term) ||
-											p.ContactInfos.Any(c => c.Value.Contains(term)));
+											   p.LastName.Contains(term) ||
+											   p.DateOfBirth.Date.ToString().Contains(term) ||
+											   p.ContactInfos.Any(c => c.Value.Contains(term)));
 				}
 			}
+			var count1 = await query1.CountAsync();
+			var count2 = await query2.CountAsync();
 
-			var results1Task = query1.ToListAsync();
-			var results2Task = query2.ToListAsync();
+			var results1Task = query1.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+			var results2Task = query2.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
 			await Task.WhenAll(results1Task, results2Task);
 
-			var results1 = results1Task.Result;
-			var results2 = results2Task.Result;
+			var results1 = await results1Task;
+			var results2 = await results2Task;
 
 			var combinedResults = results1.Concat(results2).ToList();
 
-			var count = combinedResults.Count();
+			// Implementing pagination manually
+			var count = count1 + count2;
 			var items = combinedResults.Skip((page - 1) * pageSize)
-									.Take(pageSize)
-									.ToList();
+									   .Take(pageSize)
+									   .ToList();
 
 			return new PaginatedList<Patient>(items, count, page, pageSize);
 		}
@@ -123,7 +127,7 @@ namespace PatientManagementApp.Repositories
 		public async Task<Patient> GetPatientById(Guid id)
 		{
 			var context = GetReplicaContext(id);
-			return await context.Set<Patient>().Include(p => p.ContactInfos)
+			return await context.Set<Patient>().AsNoTracking().Include(p => p.ContactInfos)
 				.Include(p => p.PrimaryAddress)
 				.Include(p => p.SecondaryAddress)
 				.FirstOrDefaultAsync(p => p.PatientId == id);
