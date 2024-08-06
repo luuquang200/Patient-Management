@@ -47,7 +47,6 @@ namespace PatientManagementApp.Repositories
 
 		private DbContext GetMasterContext(Guid patientId)
 		{
-			// Simplified sharding logic, for example:
 			var shardId = patientId.GetHashCode() % 2;
 			return (shardId == 0) ? _shard2ContextMaster : _shard1ContextMaster;
 		}
@@ -76,11 +75,11 @@ namespace PatientManagementApp.Repositories
 
 		public async Task<PaginatedList<Patient>> SearchPatients(string? searchTerm, int page, int pageSize)
 		{
-			IQueryable<Patient> query1 = _shard1ContextReplica.Patients.Include(p => p.ContactInfos)
+			IQueryable<Patient> query1 = _shard1ContextReplica.Patients.AsNoTracking().Include(p => p.ContactInfos)
 				.Include(p => p.PrimaryAddress)
 				.Include(p => p.SecondaryAddress);
 
-			IQueryable<Patient> query2 = _shard2ContextReplica.Patients.Include(p => p.ContactInfos)
+			IQueryable<Patient> query2 = _shard2ContextReplica.Patients.AsNoTracking().Include(p => p.ContactInfos)
 				.Include(p => p.PrimaryAddress)
 				.Include(p => p.SecondaryAddress);
 
@@ -123,7 +122,7 @@ namespace PatientManagementApp.Repositories
 		public async Task<Patient> GetPatientById(Guid id)
 		{
 			var context = GetReplicaContext(id);
-			return await context.Set<Patient>().Include(p => p.ContactInfos)
+			return await context.Set<Patient>().AsNoTracking().Include(p => p.ContactInfos)
 				.Include(p => p.PrimaryAddress)
 				.Include(p => p.SecondaryAddress)
 				.FirstOrDefaultAsync(p => p.PatientId == id);
