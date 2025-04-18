@@ -70,6 +70,7 @@ namespace PatientManagementApp.Repositories
 				.ToListAsync();
 
 			await Task.WhenAll(patientsShard1, patientsShard2);
+			
 			return patientsShard1.Result.Concat(patientsShard2.Result);
 		}
 
